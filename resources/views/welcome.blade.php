@@ -20,6 +20,11 @@ text {
   font-size: 10px;
 }
 
+.icons path {
+  stroke: #b1b1f1;
+  fill:#b1b1f1;
+}
+
 </style>
 </head>
 
@@ -38,9 +43,11 @@ var svg = d3.select("svg");
 var width = +svg.attr("width");
 var height = +svg.attr("height");
 
-var color =d3.scaleOrdinal()
+/*var color =d3.scaleOrdinal()
       .range(["red", "green", "blue", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-
+*/
+var icons= d3.scaleOrdinal()
+      .range(["icons/iconfinder_computer_6_3071847.svg", "icons/iconfinder_Server_858733.svg", "icons/iconfinder_Non-Service_Specific_copy_Client_259291.svg"]);
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
     .force("charge", d3.forceManyBody())
@@ -62,14 +69,30 @@ d3.json("rsc.json", function(error, graph) {
     .data(graph.nodes)
     .enter().append("g")
 
-  var circles = node.append("circle")
+var serverrouterclient= node.append("svg:image")
+            .attr("class","icons")
+            .attr("xlink:href", function(d){
+              //console.log(d.group);
+              //console.log(icons(d.group));
+              return icons(d.group);})
+            .attr("width", 20)
+            .attr("height", 20)
+            .attr('x', -5)
+            .attr('y', -5)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+/*  var circles = node.append("circle")
       .attr("r", 5)
-      .attr("fill", function(d) { return color(d.group); })
+      .style("backgroundcolor", function(d){
+        return icons(d.group);})
       .call(d3.drag()
           .on("start", dragstarted)
           .on("drag", dragged)
           .on("end", dragended));
-
+*/
   var lables = node.append("text")
       .text(function(d) {
         return d.id;
