@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: black	;
+  stroke-width: 0px;
+}
+
+</style>
+<svg width="800" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+//create somewhere to put the force directed graph
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+	
+
+ 
+var brush = d3.brush().on("end", brushended),
+    idleTimeout,
+    idleDelay = 350;
+
+
+var radius = 15; 
+
+var nodes_data =  [
+    {"name": "Lillian", "sex": "F"},
+    {"name": "Gordon", "sex": "M"},
+    {"name": "Sylvester", "sex": "M"},
+    {"name": "Mary", "sex": "F"},
+    {"name": "Helen", "sex": "F"},
+    {"name": "Jamie", "sex": "M"},
+    {"name": "Jessie", "sex": "F"},
+    {"name": "Ashton", "sex": "M"},
+    {"name": "Duncan", "sex": "M"},
+    {"name": "Evette", "sex": "F"},
+    {"name": "Mauer", "sex": "M"},
+    {"name": "Fray", "sex": "F"},
+    {"name": "Duke", "sex": "M"},
+    {"name": "Baron", "sex": "M"},
+    {"name": "Infante", "sex": "M"},
+    {"name": "Percy", "sex": "M"},
+    {"name": "Cynthia", "sex": "F"},
+    {"name": "Feyton", "sex": "M"},
+    {"name": "Lesley", "sex": "F"},
+    {"name": "Yvette", "sex": "F"},
+    {"name": "Maria", "sex": "F"},
+    {"name": "Lexy", "sex": "F"},
+    {"name": "Peter", "sex": "M"},
+    {"name": "Ashley", "sex": "F"},
+    {"name": "Finkler", "sex": "M"},
+    {"name": "Damo", "sex": "M"},
+    {"name": "Imogen", "sex": "F"}
+    ]
+
+//Sample links data 
+//type: A for Ally, E for Enemy
+var links_data = [
+	{"source": "Sylvester", "target": "Gordon", "type":"A" },
+    {"source": "Sylvester", "target": "Lillian", "type":"A" },
+    {"source": "Sylvester", "target": "Mary", "type":"A"},
+    {"source": "Sylvester", "target": "Jamie", "type":"A"},
+    {"source": "Sylvester", "target": "Jessie", "type":"A"},
+    {"source": "Sylvester", "target": "Helen", "type":"A"},
+    {"source": "Helen", "target": "Gordon", "type":"A"},
+    {"source": "Mary", "target": "Lillian", "type":"A"},
+    {"source": "Ashton", "target": "Mary", "type":"A"},
+    {"source": "Duncan", "target": "Jamie", "type":"A"},
+    {"source": "Gordon", "target": "Jessie", "type":"A"},
+    {"source": "Sylvester", "target": "Fray", "type":"E"},
+    {"source": "Fray", "target": "Mauer", "type":"A"},
+    {"source": "Fray", "target": "Cynthia", "type":"A"},
+    {"source": "Fray", "target": "Percy", "type":"A"},
+    {"source": "Percy", "target": "Cynthia", "type":"A"},
+    {"source": "Infante", "target": "Duke", "type":"A"},
+    {"source": "Duke", "target": "Gordon", "type":"A"},
+    {"source": "Duke", "target": "Sylvester", "type":"A"},
+    {"source": "Baron", "target": "Duke", "type":"A"},
+    {"source": "Baron", "target": "Sylvester", "type":"E"},
+    {"source": "Evette", "target": "Sylvester", "type":"E"},
+    {"source": "Cynthia", "target": "Sylvester", "type":"E"},
+    {"source": "Cynthia", "target": "Jamie", "type":"E"},
+    {"source": "Mauer", "target": "Jessie", "type":"E"},
+    {"source": "Duke", "target": "Lexy", "type":"A"},
+    {"source": "Feyton", "target": "Lexy", "type":"A"},
+    {"source": "Maria", "target": "Feyton", "type":"A"},
+    {"source": "Baron", "target": "Yvette", "type":"E"},
+    {"source": "Evette", "target": "Maria", "type":"E"},
+    {"source": "Cynthia", "target": "Yvette", "type":"E"},
+    {"source": "Maria", "target": "Jamie", "type":"E"},
+    {"source": "Maria", "target": "Lesley", "type":"E"},
+    {"source": "Ashley", "target": "Damo", "type":"A"},
+    {"source": "Damo", "target": "Lexy", "type":"A"},
+    {"source": "Maria", "target": "Feyton", "type":"A"},
+    {"source": "Finkler", "target": "Ashley", "type":"E"},
+    {"source": "Sylvester", "target": "Maria", "type":"E"},
+    {"source": "Peter", "target": "Finkler", "type":"E"},
+    {"source": "Ashley", "target": "Gordon", "type":"E"},
+    {"source": "Maria", "target": "Imogen", "type":"E"}
+    
+]
+
+
+//set up the simulation and add forces  
+var simulation = d3.forceSimulation()
+					.nodes(nodes_data);
+                              
+var link_force =  d3.forceLink(links_data)
+                        .id(function(d) { return d.name; });            
+         
+var charge_force = d3.forceManyBody()
+    .strength(-100); 
+    
+var center_force = d3.forceCenter(width / 2, height / 2);  
+                      
+simulation
+    .force("charge_force", charge_force)
+    .force("center_force", center_force)
+    .force("links",link_force)
+ ;
+
+        
+//add tick instructions: 
+simulation.on("tick", tickActions );
+
+//add encompassing group for the zoom 
+var g = svg.append("g")
+    .attr("class", "everything")
+	.attr("class", "brush")
+    .call(brush);
+    
+
+
+
+    // Add scales to axis
+	var k = height / width,
+    x0 = [-1000, -1700],
+    y0 = [-100, -800]
+var x = d3.scaleLinear().domain(x0).range([0, width]);
+var y = d3.scaleLinear().domain(y0).range([height, 0]);
+var xAxis = d3.axisTop(x).ticks(12),
+    yAxis = d3.axisRight(y).ticks(12 * height / width);
+	   
+//draw lines for the links 
+var link = g.append("g")
+      .attr("class", "links")
+    .selectAll("line")
+    .data(links_data)
+    .enter().append("line")
+      .attr("stroke-width", 2)
+      .style("stroke", linkColour);        
+
+	
+	
+svg.append("g")
+    .attr("class", "axis axis--x")
+	.attr("visibility", "hidden" )
+    .attr("transform", "translate(0," + (height - 10) + ")")
+    .call(xAxis);
+
+svg.append("g")
+    .attr("class", "axis axis--y")
+	.attr("visibility", "hidden" )
+    .attr("transform", "translate(10,0)")
+    .call(yAxis);
+//draw circles for the nodes 
+var node = g.append("g")
+        .attr("class", "nodes") 
+        .selectAll("circle")
+        .data(nodes_data)
+        .enter()
+        .append("circle")
+        .attr("r", radius)
+        .attr("fill", circleColour);
+ 
+ 
+//add drag capabilities  
+var drag_handler = d3.drag()
+	.on("start", drag_start)
+	.on("drag", drag_drag)
+	.on("end", drag_end);	
+	
+drag_handler(node);
+
+
+//add zoom capabilities 
+var zoom_handler = d3.zoom()
+    .scaleExtent([1 / 2, 4])
+    .on("zoom", zoom_actions);
+
+zoom_handler(svg);     
+
+/** Functions **/
+
+//Function to choose what color circle we have
+//Let's return blue for males and red for females
+function circleColour(d){
+	if(d.sex =="M"){
+		return "blue";
+	} else {
+		return "pink";
+	}
+}
+
+//Function to choose the line colour and thickness 
+//If the link type is "A" return green 
+//If the link type is "E" return red 
+function linkColour(d){
+	if(d.type == "A"){
+		return "green";
+	} else {
+		return "red";
+	}
+}
+
+//Drag functions 
+//d is the node 
+function drag_start(d) {
+ if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+ console.log(x[d.x]); 
+ console.log(y[d.y]);
+    d.fx = d.x;
+    d.fy = d.y;
+ }
+
+//make sure you can't drag the circle outside the box
+function drag_drag(d) {
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+}
+
+function drag_end(d,x,y) {
+  if (!d3.event.active) simulation.alphaTarget(0);
+  console.log(x[d.fx])
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+
+
+function tickActions() {
+    //update circle positions each tick of the simulation 
+       node
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+        
+    //update link positions 
+    link
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+} 
+    // This is wh
+function brushended() {
+  //Some how getting mouse selected part
+  var s = d3.event.selection;
+  console.log(s);
+  console.log("brushhhh")
+  if (!s) {
+    if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
+    x.domain(x0);
+    y.domain(y0);
+  } else {
+   x.domain([s[0][0], s[1][0]].map(x.invert, x));
+   y.domain([s[1][1], s[0][1]].map(y.invert, y));
+    //g.attr("transform", d3.event.transform);
+   // svg.select(".brush").call(brush.move, null);
+  }
+  zoom();
+}
+function zoom() {
+  console.log("zooooom2")
+  var t = svg.transition().duration(750);
+  svg.select(".axis--x").transition(t).call(xAxis);
+  svg.select(".axis--y").transition(t).call(yAxis);
+  //console.log(svg.select("node"))
+  //g.attr("transform", d3.event.transform)
+ //.attr("cx", function(d) { return x[d.x]; })
+    //.attr("cy", function(d) { return d.y; });
+}
+//Zoom functions 
+function zoom_actions(){
+console.log(d3.event.transform)
+    
+    g.attr("transform", d3.event.transform)
+}
+function idled() {
+  idleTimeout = null;
+}
+</script>
