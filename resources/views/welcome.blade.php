@@ -21,6 +21,7 @@ text {
 }
 
 .icons{
+  z-index: 10;
   stroke: #b1b1f1;
   fill:#b1b1f1;
 }
@@ -47,7 +48,7 @@ var height = +svg.attr("height");
       .range(["red", "green", "blue", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 */
 var icons= d3.scaleOrdinal()
-      .range(["icons/iconfinder_computer_6_3071847.svg", "icons/iconfinder_Server_858733.svg", "icons/iconfinder_Non-Service_Specific_copy_Client_259291.svg"]);
+      .range(["icons/router.svg", "icons/servers.svg", "icons/pc-screen.svg"]);
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
     .force("charge", d3.forceManyBody())
@@ -69,6 +70,13 @@ d3.json("rsc.json", function(error, graph) {
     .data(graph.nodes)
     .enter().append("g")
 
+var rect= node.append("rect")
+            .attr("width",15)
+            .attr("height", 15)
+            .attr('x', -7)
+            .attr('y', -7)
+            .attr( 'fill', 'white');
+
 var serverrouterclient= node.append("image")
             .attr("class","icons")
             .attr("xlink:href", function(d){
@@ -77,8 +85,8 @@ var serverrouterclient= node.append("image")
               return icons(d.group);})
             .attr("width", 20)
             .attr("height", 20)
-            .attr('x', -5)
-            .attr('y', -5)
+            .attr('x', -10)
+            .attr('y', -10)
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
@@ -98,7 +106,11 @@ var serverrouterclient= node.append("image")
         return d.id;
       })
       .attr('x', 6)
-      .attr('y', 3);
+      .attr('y', 3)
+      .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
 
   node.append("title")
       .text(function(d) { return d.id; });
