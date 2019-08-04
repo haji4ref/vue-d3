@@ -20,7 +20,7 @@ text {
   font-size: 10px;
 }
 
-.icons path {
+.icons{
   stroke: #b1b1f1;
   fill:#b1b1f1;
 }
@@ -69,7 +69,7 @@ d3.json("rsc.json", function(error, graph) {
     .data(graph.nodes)
     .enter().append("g")
 
-var serverrouterclient= node.append("svg:image")
+var serverrouterclient= node.append("image")
             .attr("class","icons")
             .attr("xlink:href", function(d){
               //console.log(d.group);
@@ -137,8 +137,8 @@ function dragged(d) {
 
 function dragended(d) {
   if (!d3.event.active) simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
+  d.fx = d.x;
+  d.fy = d.y;
 }
 
 </script>
