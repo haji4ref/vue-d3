@@ -22,8 +22,6 @@ text {
 
 .icons{
   z-index: 10;
-  stroke: #b1b1f1;
-  fill:#b1b1f1;
 }
 
 </style>
@@ -51,8 +49,10 @@ var icons= d3.scaleOrdinal()
       .range(["icons/router.svg", "icons/servers.svg", "icons/pc-screen.svg"]);
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width/2, height/2));
+    .force("center", d3.forceCenter(width/2, height/2))
+    .force("x",d3.forceX(width/2).strength(0.5))
+    .force("y",d3.forceY(height/2).strength(0.5))
+    .force("charge",d3.forceManyBody().strength(-1000));
 
 d3.json("rsc.json", function(error, graph) {
   if (error) throw error;
