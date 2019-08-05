@@ -16,12 +16,17 @@
 }
 
 text {
+  fill:black;
   font-family: sans-serif;
   font-size: 10px;
 }
 
 .icons{
   z-index: 10;
+}
+.iconnode{
+    fill:black;
+    z-index: 10;
 }
 
 </style>
@@ -31,7 +36,7 @@ text {
 
 <body >
 
-<svg width="960" height="600">
+<svg id="fdg" width="960" height="600">
 
 </svg>
 
@@ -102,6 +107,7 @@ var serverrouterclient= node.append("image")
           .on("end", dragended));
 */
   var lables = node.append("text")
+      .attr("class", "iconnode")
       .text(function(d) {
         return d.id;
       })
@@ -135,6 +141,23 @@ var serverrouterclient= node.append("image")
         })
   }
 });
+
+
+// Add a clipPath: everything out of this area won't be drawn.
+
+
+  // Add brushing
+
+
+  d3.select("#fdg").call( d3.brush()                     // Add the brush feature using the d3.brush function
+        .extent( [ [0,0], [width,height] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+      );
+
+  //    .on("end", updateChart) // Each time the brush selection changes, trigger the 'updateChart' function
+
+
+
+
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
