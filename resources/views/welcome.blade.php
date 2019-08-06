@@ -47,6 +47,8 @@ var svg = d3.select("svg");
 var width = +svg.attr("width");
 var height = +svg.attr("height");
 
+
+
 /*var color =d3.scaleOrdinal()
       .range(["red", "green", "blue", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 */
@@ -62,6 +64,10 @@ var simulation = d3.forceSimulation()
 d3.json("rsc.json", function(error, graph) {
   if (error) throw error;
 
+
+  var g = svg.append("g")
+      .attr("class", "everything");
+
   var link = svg.append("g")
       .attr("class", "links")
     .selectAll("line")
@@ -69,11 +75,12 @@ d3.json("rsc.json", function(error, graph) {
     .enter().append("line")
       .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
+
   var node = svg.append("g")
       .attr("class", "nodes")
     .selectAll("g")
     .data(graph.nodes)
-    .enter().append("g")
+    .enter().append("g");
 
 var rect= node.append("rect")
             .attr("width",15)
@@ -121,12 +128,17 @@ var serverrouterclient= node.append("image")
   node.append("title")
       .text(function(d) { return d.id; });
 
-  simulation
+ simulation
       .nodes(graph.nodes)
       .on("tick", ticked);
 
-  simulation.force("link")
-      .links(graph.links);
+simulation.on("tick", ticked);
+
+ simulation.force("link")
+   .links(graph.links);
+
+      //add zoom capabilities
+
 
   function ticked() {
     link
@@ -139,24 +151,58 @@ var serverrouterclient= node.append("image")
         .attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
         })
+
   }
-});
 
-
-// Add a clipPath: everything out of this area won't be drawn.
-
-
-  // Add brushing
-
-
-  d3.select("#fdg").call( d3.brush()                     // Add the brush feature using the d3.brush function
-        .extent( [ [0,0], [width,height] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+  /*d3.select("#fdg").call( d3.brush()                     // Add the brush feature using the d3.brush function
+        .extent( [ [0,0], [width,height] ] )
+        .on("end", updateChart)      // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
       );
 
-  //    .on("end", updateChart) // Each time the brush selection changes, trigger the 'updateChart' function
+       function updateChart() {
+
+
+           var zoom_handler = d3.zoom()
+               .scaleExtent([1 , 4])
+               .on("zoom", zoom_actions);
+
+               zoom_handler(this);
+           }
+
+*/
+var zoom_handler = d3.zoom()
+    .on("zoom", zoom_actions);
+  zoom_handler(svg);
+  function zoom_actions(){
+
+    var transform = d3.zoomTransform(this);
+    console.log(d3.event.transform);
+    this.setAttribute("transform", transform);
+  }
 
 
 
+
+});
+
+/*function updateChart() {
+  console.log("updatechart called");
+   }
+// Add a clipPath: everything out of this area won't be drawn.
+function zoom() {
+svg.attr("transform", d3.event.transform);
+}
+
+// Add brushing
+d3.select("#fdg")
+  .call( d3.brush()                     // Add the brush feature using the d3.brush function
+  .extent( [ [0,0], [width,height] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+).d3.zoom()
+    .scaleExtent([1, Infinity])
+    .translateExtent([[0, 0], [width, height]])
+    .extent([[0, 0], [width, height]])
+    .on("zoom", zoom);
+*/
 
 
 function dragstarted(d) {
