@@ -41,7 +41,12 @@ text {
 
 <body >
 
-<div id="fggraph"><fggraph data="rsc.json"></fggraph>
+<div id="fggraph">
+  <fggraph
+  :width="960" :height="600"
+  routerimg="icons/router.svg" serverimg="icons/servers.svg" clientimg="icons/pc-screen.svg"
+  :enlable="true" :zoomable="false"
+  ></fggraph>
 </div>
 
 </body>
