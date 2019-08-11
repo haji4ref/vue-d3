@@ -45,7 +45,7 @@ text {
   <fggraph
   :width="960" :height="600"
   routerimg="icons/router.svg" serverimg="icons/servers.svg" clientimg="icons/pc-screen.svg"
-  :enlable="true" :zoomable="false"
+  :enlable="true" :zoomable="true"
   ></fggraph>
 </div>
 

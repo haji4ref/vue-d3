@@ -102,7 +102,7 @@ Vue.component('fggraph', {
 	          .nodes(graph.nodes)
 	          .on("tick", ticked);
 
-	    simulation.on("tick", ticked);
+	   // simulation.on("tick", ticked);
 
 	     simulation.force("link")
 	       .links(graph.links);
