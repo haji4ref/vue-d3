@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import Axios from 'axios';
+import * as d3 from 'd3';
 window.Vue = Vue;
+//window.D3 = D3;
 window.axios= Axios;
 window._ = require('lodash');
 

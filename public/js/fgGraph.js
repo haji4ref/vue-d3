@@ -1,4 +1,9 @@
 
+import Vue from 'vue';
+import * as d3 from 'd3';
+//<script src="https://unpkg.com/vue@2.1.10/dist/vue.js"></script>
+//<script src="https://d3js.org/d3.v4.min.js"></script>
+
 
 Vue.component('fggraph', {
 	//props: ['w','h','routerimg','serverimg','clientimg','zoomable','enlable'],
@@ -25,7 +30,7 @@ Vue.component('fggraph', {
 	    var svg = d3.select("svg");
 			var w= this.width;
 	    var h = this.height;
-			console.log(this.zoomable);
+			//console.log(this.zoomable);
 			var enlable= this.enlable;
 			var zoomable=this.zoomable;
 
@@ -88,7 +93,7 @@ Vue.component('fggraph', {
 	          .text(function(d) {
 	            return d.id;
 	          })
-	          .attr('x', 6)
+	          .attr('x', 10)
 	          .attr('y', 3)
 	          .call(d3.drag()
 	              .on("start", dragstarted)

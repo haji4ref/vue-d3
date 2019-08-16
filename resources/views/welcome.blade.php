@@ -3,9 +3,7 @@
 
 <head>
 <meta charset="utf-8">
-<script src="https://unpkg.com/vue@2.1.10/dist/vue.js"></script>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-
+<!-- <script src="https://unpkg.com/vue@2.1.10/dist/vue.js"></script> -->
 <style>
 
 .links line {
@@ -51,5 +49,5 @@ text {
 
 </body>
 
-<script src="js/fgGraph.js"></script>
+<script src="build/bundle.js"></script>
 </html>
