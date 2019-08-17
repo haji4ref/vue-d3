@@ -23,9 +23,7 @@
         "sass": "^1.15.2",
         "sass-loader": "^7.1.0",
         "vue": "^2.6.10",
-        "vue-template-compiler": "^2.6.10",
-        "webpack": "^4.39.2",
-        "webpack-cli": "^3.3.6"
+        "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {}
 }
