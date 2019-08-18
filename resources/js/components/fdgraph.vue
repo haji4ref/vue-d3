@@ -19,175 +19,132 @@ export default{
         clientimg:String
       },
       mounted:function() {
-
-        //console.log(this.routerimg);
-          var d3 = require("d3");
-          var svg = d3.select("svg");
+          var d3 = require("d3");//call d3 library
+          var svg = d3.select("svg");//select the svg element defined in template
           var w= this.width;
           var h = this.height;
-          //console.log(this.zoomable);
-          var enlable= this.enlable;
-          var zoomable=this.zoomable;
-
-            //console.log(this.routerimg);
-          var icons= [0,this.routerimg,this.serverimg,this.clientimg];
-        //	console.log(routerimg);
-          var simulation = d3.forceSimulation()
-              .force("link", d3.forceLink().id(function(d) { return d.id; }))
-              .force("center", d3.forceCenter(w/2, h/2))
-              .force("x",d3.forceX(w/2).strength(0.5))
-              .force("y",d3.forceY(h/2).strength(0.5))
-              .force("charge",d3.forceManyBody().strength(-1000));
+          var enlable= this.enlable;//whether to show lables or not, taken from the parent element
+          var zoomable=this.zoomable;//whether to zoom or not, taken from the parent element
+          var icons= [0,this.routerimg,this.serverimg,this.clientimg];//put icons image in an array
+          var simulation = d3.forceSimulation() //Creates a new simulation with an empty array of nodes
+              //simulation.force(name[, force])
+              //If force is specified, assigns the force for the specified name and returns the simulation
+              //A force is simply a function that modifies nodes’ positions or velocities
+              //To use this module, create a simulation for an array of nodes, and compose the desired forces.
+              //Then listen for tick events to render the nodes as they update in your preferred graphics system, such as Canvas or SVG.
+              .force("link", d3.forceLink() //Creates a new link force with the specified links and default parameters.
+                .id(function(d) { return d.id; }))
+              .force("center", d3.forceCenter(w/2, h/2)) //Creates a new centering force with the specified x- and y- coordinates
+              .force("x",d3.forceX(w/2).strength(0.5)) //Creates a new positioning force along the x-axis towards the given position x.
+                                                      // The strength determines how much to increment the node’s x-velocity
+              .force("y",d3.forceY(h/2).strength(0.5))//Creates a new positioning force along the y-axis towards the given position x.
+                                                      // The strength determines how much to increment the node’s y-velocity
+              .force("charge",
+                d3.forceManyBody().strength(-1000));//If strength is specified, sets the strength accessor to the specified number or function,
+                                                    // re-evaluates the strength accessor for each node, and returns this force.
+                                                    // A positive value causes nodes to attract each other, similar to gravity,
+                                                    // while a negative value causes nodes to repel each other, similar to electrostatic charge.
 
           d3.json("rsc.json", function(error, graph) {
-            if (error) throw error;
+                  if (error) throw error;
+
+                  var g = svg.append("g") //make a group element that points to the svg element
+                      .attr("class", "everything");
+
+                  var link = svg.append("g") //make a group element that points to link elements
+                              .attr("class", "links")
+                              .selectAll("line")
+                              .data(graph.links) //reads the links of the given graph from the input json file
+                              .enter().append("line")
+                              .attr("stroke-width", function(d) { //sets how thick the lines are
+                                  return Math.sqrt(d.value); });
 
 
-            var g = svg.append("g")
-                .attr("class", "everything");
+                  var node = svg.append("g") //make a group element that points to node elements
+                              .attr("class", "nodes")
+                              .selectAll("g")
+                              .data(graph.nodes)//reads the nodes of the given graph from the input json file
+                              .enter().append("g");
 
-            var link = svg.append("g")
-                .attr("class", "links")
-              .selectAll("line")
-              .data(graph.links)
-              .enter().append("line")
-                .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+                  var rect= node.append("rect") //this does not let lines to collide to icons, like a white background for icons
+                              .attr("width",15)
+                              .attr("height", 15)
+                              .attr('x', -7)
+                              .attr('y', -7)
+                              .attr( 'fill', 'white');
+                  var serverrouterclient= node.append("image")//this sets the icons
+                              .attr("class","icons")
+                              .attr("xlink:href", function(d){
+                                  return icons[d.group];})
+                              .attr("width", 20)
+                              .attr("height", 20)
+                              .attr('x', -10)
+                              .attr('y', -10)
+                              .call(d3.drag() //these 3 functions helps to move move the nodes
+                                  .on("start", dragstarted)
+                                  .on("drag", dragged)
+                                  .on("end", dragended));
+                  if(enlable){
+                     var lables = node.append("text") //add lables to nodes
+                        .attr("class", "iconnode")
+                        .text(function(d) {
+                          return d.id;
+                        })
+                        .attr('x', 10)
+                        .attr('y', 3)
+                        .call(d3.drag()
+                            .on("start", dragstarted)
+                            .on("drag", dragged)
+                            .on("end", dragended));
+                    }
 
+                    node.append("title") //add titles to nodes
+                        .text(function(d) {
+                            return d.id; });
 
-            var node = svg.append("g")
-                .attr("class", "nodes")
-              .selectAll("g")
-              .data(graph.nodes)
-              .enter().append("g");
+                    simulation.nodes(graph.nodes)
+                      .on("tick", ticked);//use simulation.on to listen for tick events as the simulation runs
+                    simulation.force("link")//to draw the links
+                      .links(graph.links);
+                    function ticked() { //by each tick this functions is called which takes x,y of source and update a line
+                                        // to x,y of target and update the position of the nodes
+                      link
+                          .attr("x1", function(d) { return d.source.x; })
+                          .attr("y1", function(d) { return d.source.y; })
+                          .attr("x2", function(d) { return d.target.x; })
+                          .attr("y2", function(d) { return d.target.y; });
 
-          var rect= node.append("rect")
-                      .attr("width",15)
-                      .attr("height", 15)
-                      .attr('x', -7)
-                      .attr('y', -7)
-                      .attr( 'fill', 'white');
+                      node
+                          .attr("transform", function(d) {
+                            return "translate(" + d.x + "," + d.y + ")";
+                          })
 
-          var serverrouterclient= node.append("image")
-                      .attr("class","icons")
-                      .attr("xlink:href", function(d){
-                        //console.log(d.group);
-                        //console.log(icons[d.group]);
-                        return icons[d.group];})
-                      .attr("width", 20)
-                      .attr("height", 20)
-                      .attr('x', -10)
-                      .attr('y', -10)
-                      .call(d3.drag()
-                          .on("start", dragstarted)
-                          .on("drag", dragged)
-                          .on("end", dragended));
-
-          if(enlable)
-           { var lables = node.append("text")
-                .attr("class", "iconnode")
-                .text(function(d) {
-                  return d.id;
-                })
-                .attr('x', 10)
-                .attr('y', 3)
-                .call(d3.drag()
-                    .on("start", dragstarted)
-                    .on("drag", dragged)
-                    .on("end", dragended));}
-
-            node.append("title")
-                .text(function(d) { return d.id; });
-
-           simulation
-                .nodes(graph.nodes)
-                .on("tick", ticked);
-
-         // simulation.on("tick", ticked);
-
-           simulation.force("link")
-             .links(graph.links);
-
-                //add zoom capabilities
-
-
-            function ticked() {
-              link
-                  .attr("x1", function(d) { return d.source.x; })
-                  .attr("y1", function(d) { return d.source.y; })
-                  .attr("x2", function(d) { return d.target.x; })
-                  .attr("y2", function(d) { return d.target.y; });
-
-              node
-                  .attr("transform", function(d) {
-                    return "translate(" + d.x + "," + d.y + ")";
-                  })
-
-            }
-
-            /*d3.select("#fdg").call( d3.brush()                     // Add the brush feature using the d3.brush function
-                  .extent( [ [0,0], [width,height] ] )
-                  .on("end", updateChart)      // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-                );
-
-                 function updateChart() {
-
-
-                     var zoom_handler = d3.zoom()
-                         .scaleExtent([1 , 4])
-                         .on("zoom", zoom_actions);
-
-                         zoom_handler(this);
-                     }
-
-          */
-          if(zoomable){
-          var zoom_handler = d3.zoom()
-               .scaleExtent([0.25, 4])
-              .on("zoom", zoom_actions);
-            zoom_handler(svg);
-            function zoom_actions(){
-
-              var transform = d3.zoomTransform(this);
-              console.log(d3.event.transform);
-              this.setAttribute("transform", transform);
-            }}
-
-
-
-
-          });
-
-          /*function updateChart() {
-            console.log("updatechart called");
-             }
-          // Add a clipPath: everything out of this area won't be drawn.
-          function zoom() {
-          svg.attr("transform", d3.event.transform);
-          }
-
-          // Add brushing
-          d3.select("#fdg")
-            .call( d3.brush()                     // Add the brush feature using the d3.brush function
-            .extent( [ [0,0], [width,height] ] )       // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-          ).d3.zoom()
-              .scaleExtent([1, Infinity])
-              .translateExtent([[0, 0], [width, height]])
-              .extent([[0, 0], [width, height]])
-              .on("zoom", zoom);
-          */
-
+                    }
+                  if(zoomable){
+                      var zoom_handler = d3.zoom() //use d3 zoom handler
+                           .scaleExtent([0.25, 4])
+                           .on("zoom", zoom_actions);//this is called with double click and mouse event
+                      zoom_handler(svg);
+                      function zoom_actions(){
+                          var transform = d3.zoomTransform(this);
+                          this.setAttribute("transform", transform);
+                          }}
+                });
 
           function dragstarted(d) {
-            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
+            if (!d3.event.active) simulation.alphaTarget(0.3) //For each iteration,
+                                                              //it increments the current alpha by (alphaTarget - alpha) × alphaDecay;
+                                                              // then invokes each registered force, passing the new alpha;
+                                                              // then decrements each node’s velocity by velocity × velocityDecay;
+                                                              //lastly increments each node’s position by velocity
+                .restart();//Restarts the simulation’s internal timer and returns the simulation
+            d.fx = d.x; //fx - the node’s fixed x-position
+            d.fy = d.y; //fy - the node’s fixed y-position
           }
-
           function dragged(d) {
             d.fx = d3.event.x;
             d.fy = d3.event.y;
           }
-
           function dragended(d) {
             if (!d3.event.active) simulation.alphaTarget(0);
             d.fx = d.x;
