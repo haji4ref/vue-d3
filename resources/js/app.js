@@ -29,5 +29,6 @@ Vue.component('fdgraph', require('./components/fdgraph.vue').default);
  */
 
 const app = new Vue({
-    el: '#app'
+    el: '#app',
+
 });

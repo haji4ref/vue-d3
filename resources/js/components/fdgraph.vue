@@ -1,8 +1,10 @@
 <template>
-
+<div>
   <svg id="fdg" :width= "width" :height= "height">
   </svg>
-
+  <button type="button" id="smaller">smaller</button>
+  <button type="button" id="bigger">bigger</button>
+</div>
 </template>
 
 
@@ -18,7 +20,18 @@ export default{
         serverimg:String,
         clientimg:String
       },
+      created: function(){
+        function bigger(){
+            strength*=1.2;
+            console.log(strength);
+        }
+         function smaller(){
+            strength/=1.2;
+            console.log(strength);
+         }
+      },
       mounted:function() {
+          var strength=1;
           var d3 = require("d3");//call d3 library
           var svg = d3.select("svg");//select the svg element defined in template
           var w= this.width;
@@ -26,6 +39,7 @@ export default{
           var enlable= this.enlable;//whether to show lables or not, taken from the parent element
           var zoomable=this.zoomable;//whether to zoom or not, taken from the parent element
           var icons= [0,this.routerimg,this.serverimg,this.clientimg];//put icons image in an array
+          console.log(strength);
           var simulation = d3.forceSimulation() //Creates a new simulation with an empty array of nodes
               //simulation.force(name[, force])
               //If force is specified, assigns the force for the specified name and returns the simulation
@@ -40,12 +54,15 @@ export default{
               .force("y",d3.forceY(h/2).strength(0.5))//Creates a new positioning force along the y-axis towards the given position x.
                                                       // The strength determines how much to increment the node’s y-velocity
               .force("charge",
-                d3.forceManyBody().strength(-1000));//If strength is specified, sets the strength accessor to the specified number or function,
+                d3.forceManyBody().strength(-1000*strength));//If strength is specified, sets the strength accessor to the specified number or function,
                                                     // re-evaluates the strength accessor for each node, and returns this force.
                                                     // A positive value causes nodes to attract each other, similar to gravity,
                                                     // while a negative value causes nodes to repel each other, similar to electrostatic charge.
 
-          d3.json("rsc.json", function(error, graph) {
+
+
+
+        d3.json("rsc.json", function(error, graph) {
                   if (error) throw error;
 
                   var g = svg.append("g") //make a group element that points to the svg element
@@ -106,8 +123,10 @@ export default{
                       .on("tick", ticked);//use simulation.on to listen for tick events as the simulation runs
                     simulation.force("link")//to draw the links
                       .links(graph.links);
+
                     function ticked() { //by each tick this functions is called which takes x,y of source and update a line
                                         // to x,y of target and update the position of the nodes
+
                       link
                           .attr("x1", function(d) { return d.source.x; })
                           .attr("y1", function(d) { return d.source.y; })
@@ -118,6 +137,8 @@ export default{
                           .attr("transform", function(d) {
                             return "translate(" + d.x + "," + d.y + ")";
                           })
+
+
 
                     }
                   if(zoomable){
@@ -150,12 +171,38 @@ export default{
             d.fx = d.x;
             d.fy = d.y;
           }
+          var small= d3.select("#smaller") //make the graph smaller
+                        .on("click", function(){
+                            strength/=1.2;
+                            console.log(strength);
+                            simulation.force("charge",d3.forceManyBody().strength(-1000*strength));
+                            simulation.alpha(1).restart();
+
+          });
+          var big= d3.select("#bigger") //make the graph bigger
+                      .on("click", function(){
+                          strength*=1.2;
+                          console.log(strength);
+                          simulation.force("charge",d3.forceManyBody().strength(-1000*strength));
+                          simulation.alpha(1).restart();
+                            });
         }
     }
 </script>
 
 <style lang="css">
-
+    svg{
+      display: inline-block;
+      float: left;
+      border: solid black 1px;
+      border-radius: 1rem;
+    }
+    button{
+      margin-top: 15%;
+      margin-left: 1%;
+      display: inline-block;
+      border-radius: 1rem;
+    }
     .links line {
       stroke: #999;
       stroke-opacity: 0.6;
