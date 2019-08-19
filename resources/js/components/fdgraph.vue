@@ -188,28 +188,32 @@ export default{
           let xaxis= d3.select("#xaxis") //make the graph stretch in y-axis
                       .on("click", function(){
                           xstrength*=1.2;
-                          console.log(strength);
+                          if(xstrength>6) xstrength= 6;
+                          console.log(xstrength);
                           simulation.force("x",d3.forceX(w/2).strength(0.5*xstrength));
                           simulation.alpha(1).restart();
                             });
           let yaxis= d3.select("#yaxis") //make the graph stretch in x-axis
                     .on("click", function(){
                         ystrength*=1.2;
-                        console.log(strength);
+                        if(ystrength>6) ystrength= 6;
+                        console.log(ystrength);
                         simulation.force("y",d3.forceY(h/2).strength(0.5*ystrength));
                         simulation.alpha(1).restart();
                           });
           let dxaxis= d3.select("#dxaxis") //make the graph de-stretch in y-axis
                       .on("click", function(){
                           xstrength/=1.2;
-                          console.log(strength);
+                          if(xstrength<0.05) xstrength= 0.05;
+                          console.log(xstrength);
                           simulation.force("x",d3.forceX(w/2).strength(0.5*xstrength));
                           simulation.alpha(1).restart();
                             });
           let dyaxis= d3.select("#dyaxis") //make the graph de-stretch in x-axis
                     .on("click", function(){
                         ystrength/=1.2;
-                        console.log(strength);
+                        if(ystrength<0.05) ystrength= 0.05;
+                        console.log(ystrength);
                         simulation.force("y",d3.forceY(h/2).strength(0.5*ystrength));
                         simulation.alpha(1).restart();
                           });
@@ -228,6 +232,9 @@ export default{
       margin-left: 1%;
       margin-top: 1%;
       border-radius: 1rem;
+    }
+    button:hover{
+      cursor: pointer;
     }
     #buttonholder{
       padding-top: 10%;
