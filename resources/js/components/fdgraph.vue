@@ -2,8 +2,15 @@
 <div>
   <svg id="fdg" :width= "width" :height= "height">
   </svg>
-  <button type="button" id="smaller">smaller</button>
-  <button type="button" id="bigger">bigger</button>
+  <div id="buttonholder">
+    <button type="button" id="smaller">smaller</button>
+    <button type="button" id="xaxis">stretch in y-axis</button>
+    <button type="button" id="dxaxis">de-stretch in y-axis</button>
+    <button type="button" id="bigger">bigger</button>
+    <button type="button" id="yaxis">stretch in x-axis</button>
+    <button type="button" id="dyaxis">de-stretch in x-axis</button>
+  </div>
+
 </div>
 </template>
 
@@ -16,30 +23,22 @@ export default{
         zoomable:Boolean,
         height: Number,
         width: Number,
-        routerimg:String,
-        serverimg:String,
-        clientimg:String
+        jsonfile:String,
+        icons: Array
       },
-      created: function(){
-        function bigger(){
-            strength*=1.2;
-            console.log(strength);
-        }
-         function smaller(){
-            strength/=1.2;
-            console.log(strength);
-         }
-      },
+
       mounted:function() {
+          var xstrength=1;
+          var ystrength=1;
           var strength=1;
           var d3 = require("d3");//call d3 library
           var svg = d3.select("svg");//select the svg element defined in template
+          var inputfile= this.jsonfile;//get the input file in json from parent element
           var w= this.width;
           var h = this.height;
           var enlable= this.enlable;//whether to show lables or not, taken from the parent element
           var zoomable=this.zoomable;//whether to zoom or not, taken from the parent element
-          var icons= [0,this.routerimg,this.serverimg,this.clientimg];//put icons image in an array
-          console.log(strength);
+          var icons= this.icons;//put icons image in an array
           var simulation = d3.forceSimulation() //Creates a new simulation with an empty array of nodes
               //simulation.force(name[, force])
               //If force is specified, assigns the force for the specified name and returns the simulation
@@ -54,7 +53,7 @@ export default{
               .force("y",d3.forceY(h/2).strength(0.5))//Creates a new positioning force along the y-axis towards the given position x.
                                                       // The strength determines how much to increment the node’s y-velocity
               .force("charge",
-                d3.forceManyBody().strength(-1000*strength));//If strength is specified, sets the strength accessor to the specified number or function,
+                d3.forceManyBody().strength(-1000));//If strength is specified, sets the strength accessor to the specified number or function,
                                                     // re-evaluates the strength accessor for each node, and returns this force.
                                                     // A positive value causes nodes to attract each other, similar to gravity,
                                                     // while a negative value causes nodes to repel each other, similar to electrostatic charge.
@@ -62,7 +61,7 @@ export default{
 
 
 
-        d3.json("rsc.json", function(error, graph) {
+        d3.json(inputfile, function(error, graph) {
                   if (error) throw error;
 
                   var g = svg.append("g") //make a group element that points to the svg element
@@ -186,7 +185,35 @@ export default{
                           simulation.force("charge",d3.forceManyBody().strength(-1000*strength));
                           simulation.alpha(1).restart();
                             });
-        }
+          var xaxis= d3.select("#xaxis") //make the graph stretch in y-axis
+                      .on("click", function(){
+                          xstrength*=1.2;
+                          console.log(strength);
+                          simulation.force("x",d3.forceX(w/2).strength(0.5*xstrength));
+                          simulation.alpha(1).restart();
+                            });
+          var yaxis= d3.select("#yaxis") //make the graph stretch in x-axis
+                    .on("click", function(){
+                        ystrength*=1.2;
+                        console.log(strength);
+                        simulation.force("y",d3.forceY(h/2).strength(0.5*ystrength));
+                        simulation.alpha(1).restart();
+                          });
+          var dxaxis= d3.select("#dxaxis") //make the graph de-stretch in y-axis
+                      .on("click", function(){
+                          xstrength/=1.2;
+                          console.log(strength);
+                          simulation.force("x",d3.forceX(w/2).strength(0.5*xstrength));
+                          simulation.alpha(1).restart();
+                            });
+          var dyaxis= d3.select("#dyaxis") //make the graph de-stretch in x-axis
+                    .on("click", function(){
+                        ystrength/=1.2;
+                        console.log(strength);
+                        simulation.force("y",d3.forceY(h/2).strength(0.5*ystrength));
+                        simulation.alpha(1).restart();
+                          });
+}
     }
 </script>
 
@@ -198,10 +225,14 @@ export default{
       border-radius: 1rem;
     }
     button{
-      margin-top: 15%;
       margin-left: 1%;
-      display: inline-block;
+      margin-top: 1%;
       border-radius: 1rem;
+    }
+    #buttonholder{
+      padding-top: 10%;
+      display: inline-block;
+      width: 23%;
     }
     .links line {
       stroke: #999;
