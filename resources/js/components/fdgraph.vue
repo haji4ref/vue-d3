@@ -28,18 +28,18 @@ export default{
       },
 
       mounted:function() {
-          var xstrength=1;
-          var ystrength=1;
-          var strength=1;
-          var d3 = require("d3");//call d3 library
-          var svg = d3.select("svg");//select the svg element defined in template
-          var inputfile= this.jsonfile;//get the input file in json from parent element
-          var w= this.width;
-          var h = this.height;
-          var enlable= this.enlable;//whether to show lables or not, taken from the parent element
-          var zoomable=this.zoomable;//whether to zoom or not, taken from the parent element
-          var icons= this.icons;//put icons image in an array
-          var simulation = d3.forceSimulation() //Creates a new simulation with an empty array of nodes
+          let xstrength=1;
+          let ystrength=1;
+          let strength=1;
+          let d3 = require("d3");//call d3 library
+          let svg = d3.select("svg");//select the svg element defined in template
+          const inputfile= this.jsonfile;//get the input file in json from parent element
+          let w= this.width;
+          let h = this.height;
+          let enlable= this.enlable;//whether to show lables or not, taken from the parent element
+          let zoomable=this.zoomable;//whether to zoom or not, taken from the parent element
+          const icons= this.icons;//put icons image in an array
+          let simulation = d3.forceSimulation() //Creates a new simulation with an empty array of nodes
               //simulation.force(name[, force])
               //If force is specified, assigns the force for the specified name and returns the simulation
               //A force is simply a function that modifies nodes’ positions or velocities
@@ -64,10 +64,10 @@ export default{
         d3.json(inputfile, function(error, graph) {
                   if (error) throw error;
 
-                  var g = svg.append("g") //make a group element that points to the svg element
+                  let g = svg.append("g") //make a group element that points to the svg element
                       .attr("class", "everything");
 
-                  var link = svg.append("g") //make a group element that points to link elements
+                  let link = svg.append("g") //make a group element that points to link elements
                               .attr("class", "links")
                               .selectAll("line")
                               .data(graph.links) //reads the links of the given graph from the input json file
@@ -76,19 +76,19 @@ export default{
                                   return Math.sqrt(d.value); });
 
 
-                  var node = svg.append("g") //make a group element that points to node elements
+                  let node = svg.append("g") //make a group element that points to node elements
                               .attr("class", "nodes")
                               .selectAll("g")
                               .data(graph.nodes)//reads the nodes of the given graph from the input json file
                               .enter().append("g");
 
-                  var rect= node.append("rect") //this does not let lines to collide to icons, like a white background for icons
+                  let rect= node.append("rect") //this does not let lines to collide to icons, like a white background for icons
                               .attr("width",15)
                               .attr("height", 15)
                               .attr('x', -7)
                               .attr('y', -7)
                               .attr( 'fill', 'white');
-                  var serverrouterclient= node.append("image")//this sets the icons
+                  let serverrouterclient= node.append("image")//this sets the icons
                               .attr("class","icons")
                               .attr("xlink:href", function(d){
                                   return icons[d.group];})
@@ -101,7 +101,7 @@ export default{
                                   .on("drag", dragged)
                                   .on("end", dragended));
                   if(enlable){
-                     var lables = node.append("text") //add lables to nodes
+                     let lables = node.append("text") //add lables to nodes
                         .attr("class", "iconnode")
                         .text(function(d) {
                           return d.id;
@@ -141,12 +141,12 @@ export default{
 
                     }
                   if(zoomable){
-                      var zoom_handler = d3.zoom() //use d3 zoom handler
+                      let zoom_handler = d3.zoom() //use d3 zoom handler
                            .scaleExtent([0.25, 4])
                            .on("zoom", zoom_actions);//this is called with double click and mouse event
                       zoom_handler(svg);
                       function zoom_actions(){
-                          var transform = d3.zoomTransform(this);
+                          let transform = d3.zoomTransform(this);
                           this.setAttribute("transform", transform);
                           }}
                 });
@@ -170,7 +170,7 @@ export default{
             d.fx = d.x;
             d.fy = d.y;
           }
-          var small= d3.select("#smaller") //make the graph smaller
+          let small= d3.select("#smaller") //make the graph smaller
                         .on("click", function(){
                             strength/=1.2;
                             console.log(strength);
@@ -178,35 +178,35 @@ export default{
                             simulation.alpha(1).restart();
 
           });
-          var big= d3.select("#bigger") //make the graph bigger
+          let big= d3.select("#bigger") //make the graph bigger
                       .on("click", function(){
                           strength*=1.2;
                           console.log(strength);
                           simulation.force("charge",d3.forceManyBody().strength(-1000*strength));
                           simulation.alpha(1).restart();
                             });
-          var xaxis= d3.select("#xaxis") //make the graph stretch in y-axis
+          let xaxis= d3.select("#xaxis") //make the graph stretch in y-axis
                       .on("click", function(){
                           xstrength*=1.2;
                           console.log(strength);
                           simulation.force("x",d3.forceX(w/2).strength(0.5*xstrength));
                           simulation.alpha(1).restart();
                             });
-          var yaxis= d3.select("#yaxis") //make the graph stretch in x-axis
+          let yaxis= d3.select("#yaxis") //make the graph stretch in x-axis
                     .on("click", function(){
                         ystrength*=1.2;
                         console.log(strength);
                         simulation.force("y",d3.forceY(h/2).strength(0.5*ystrength));
                         simulation.alpha(1).restart();
                           });
-          var dxaxis= d3.select("#dxaxis") //make the graph de-stretch in y-axis
+          let dxaxis= d3.select("#dxaxis") //make the graph de-stretch in y-axis
                       .on("click", function(){
                           xstrength/=1.2;
                           console.log(strength);
                           simulation.force("x",d3.forceX(w/2).strength(0.5*xstrength));
                           simulation.alpha(1).restart();
                             });
-          var dyaxis= d3.select("#dyaxis") //make the graph de-stretch in x-axis
+          let dyaxis= d3.select("#dyaxis") //make the graph de-stretch in x-axis
                     .on("click", function(){
                         ystrength/=1.2;
                         console.log(strength);
