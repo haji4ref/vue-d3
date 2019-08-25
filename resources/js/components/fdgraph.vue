@@ -66,10 +66,9 @@ export default{
                                                     // while a negative value causes nodes to repel each other, similar to electrostatic charge.
 
 
-
-
-        d3.json(inputfile, function(error, graph) {
-                  if (error) throw error;
+        d3.json(inputfile).then(function(graph) {
+        //d3.json(inputfile, function(error, graph) {
+                //  if (error) throw error;
 
                   let g = svg.append("g") //make a group element that points to the svg element
                       .attr("class", "everything");
@@ -95,7 +94,7 @@ export default{
                               .attr('x', -7)
                               .attr('y', -7)
                               .attr( 'fill', 'white');
-                  let serverrouterclient= node.append("image")//this sets the icons
+                  let iconimage= node.append("image")//this sets the icons
                               .attr("class","icons")
                               .attr("xlink:href", function(d){
                                   return icons[d.group];})
@@ -107,6 +106,7 @@ export default{
                                   .on("start", dragstarted)
                                   .on("drag", dragged)
                                   .on("end", dragended));
+
                   if(enlable){
                      let lables = node.append("text") //add lables to nodes
                         .attr("class", "iconnode")
@@ -158,6 +158,55 @@ export default{
                           }}
 
 
+
+                  let small= d3.select("#smaller") //make the graph smaller
+                                .on("click", function(){
+                                    generalscale/=1.2;
+                                    simulation.force("charge",d3.forceManyBody().strength(generalscale));
+                                    simulation.alpha(1).restart();
+
+                  });
+                  let big= d3.select("#bigger") //make the graph bigger
+                              .on("click", function(){
+                                  generalscale *=1.2;
+                                  simulation.force("charge",d3.forceManyBody().strength(generalscale));
+                                  simulation.alpha(1).restart();
+
+
+                                  //.attr('fx',null)
+                                    //        .attr('fy',null);
+                                //  console.log(iconimage._groups[0]);
+
+                                    });
+                  let xaxis= d3.select("#xaxis") //make the graph stretch in y-axis
+                              .on("click", function(){
+                                  xscale*=1.2;
+                                  if(xscale>3) xscale= 3;
+                                  simulation.force("x",d3.forceX(xcenter).strength(xscale)).force("charge",d3.forceManyBody().strength(generalscale));
+                                  simulation.alpha(1).restart();
+                                    });
+                  let yaxis= d3.select("#yaxis") //make the graph stretch in x-axis
+                            .on("click", function(){
+                                yscale*=1.2;
+                                if(yscale>3) yscale= 3;
+                                simulation.force("y",d3.forceY(ycenter).strength(yscale)).force("charge",d3.forceManyBody().strength(generalscale));
+                                simulation.alpha(1).restart();
+                                  });
+                  let dxaxis= d3.select("#dxaxis") //make the graph de-stretch in y-axis
+                              .on("click", function(){
+                                  xscale/=1.2;
+                                  if(xscale<0.05*0.5) xscale= 0.05*0.5;
+                                  simulation.force("x",d3.forceX(xcenter).strength(xscale)).force("charge",d3.forceManyBody().strength(generalscale));
+                                  simulation.alpha(1).restart();
+                                    });
+                  let dyaxis= d3.select("#dyaxis") //make the graph de-stretch in x-axis
+                            .on("click", function(){
+                                yscale/=1.2;
+                                if(yscale<0.05*0.5) yscale= 0.05*0.5;
+                                simulation.force("y",d3.forceY(ycenter).strength(yscale)).force("charge",d3.forceManyBody().strength(generalscale));
+                                simulation.alpha(1).restart();
+                                  });
+
           });
           function dragstarted(d) {
             if (!d3.event.active) simulation.alphaTarget(0.3) //For each iteration,
@@ -172,127 +221,85 @@ export default{
           function dragged(d) {
             d.fx = d3.event.x;
             d.fy = d3.event.y;
+
           }
           function dragended(d) {
             if (!d3.event.active) simulation.alphaTarget(0);
             d.fx = d.x;
             d.fy = d.y;
+            console.log(d);
           }
 
-          let small= d3.select("#smaller") //make the graph smaller
-                        .on("click", function(){
-                            generalscale/=1.2;
-                            simulation.force("charge",d3.forceManyBody().strength(generalscale));
-                            simulation.alpha(1).restart();
+                    let b=svg.append("g") //brush and zoom
+                      .attr("class", "brush")
+                      .call(d3.brush()
+                      .extent( [ [0,0], [w,h] ] )
+                      .on("end", zooming));
 
-          });
-
-          let big= d3.select("#bigger") //make the graph bigger
-                      .on("click", function(){
-                          generalscale *=1.2;
-                          simulation.force("charge",d3.forceManyBody().strength(generalscale));
-                          simulation.alpha(1).restart();
-                            });
-          let xaxis= d3.select("#xaxis") //make the graph stretch in y-axis
-                      .on("click", function(){
-                          xscale*=1.2;
-                          if(xscale>3) xscale= 3;
-                          simulation.force("x",d3.forceX(xcenter).strength(xscale)).force("charge",d3.forceManyBody().strength(generalscale));
-                          simulation.alpha(1).restart();
-                            });
-          let yaxis= d3.select("#yaxis") //make the graph stretch in x-axis
-                    .on("click", function(){
-                        yscale*=1.2;
-                        if(yscale>3) yscale= 3;
-                        simulation.force("y",d3.forceY(ycenter).strength(yscale)).force("charge",d3.forceManyBody().strength(generalscale));
-                        simulation.alpha(1).restart();
-                          });
-          let dxaxis= d3.select("#dxaxis") //make the graph de-stretch in y-axis
-                      .on("click", function(){
-                          xscale/=1.2;
-                          if(xscale<0.05*0.5) xscale= 0.05*0.5;
-                          simulation.force("x",d3.forceX(xcenter).strength(xscale)).force("charge",d3.forceManyBody().strength(generalscale));
-                          simulation.alpha(1).restart();
-                            });
-          let dyaxis= d3.select("#dyaxis") //make the graph de-stretch in x-axis
-                    .on("click", function(){
-                        yscale/=1.2;
-                        if(yscale<0.05*0.5) yscale= 0.05*0.5;
-                        simulation.force("y",d3.forceY(ycenter).strength(yscale)).force("charge",d3.forceManyBody().strength(generalscale));
-                        simulation.alpha(1).restart();
-                          });
-
-
-          let b=svg.append("g") //brush and zoom
-          .attr("class", "brush")
-          .call(d3.brush()
-          .extent( [ [0,0], [w,h] ] )
-          .on("end", zooming));
-
-          function zooming() {
-            if (d3.event.selection) { //if selection happens
-                let selection = d3.event.selection; //get the selection
-                //set the new center
-                xcenter= (selection[0][0]+selection[1][0])/2;
-                ycenter= (selection[0][1]+selection[1][1])/2;
-                //get width and heigth of brush element
-                let xd= selection[1][0]-selection[0][0];
-                let yd= selection[1][1]-selection[0][1];
-                //calculate the xscale and yscale and find the min to apply
-                let zaribx= w/xd;
-                let zariby=h/yd;
-                let zarib= 0;
-                if(zaribx>zariby) zarib=zariby; else zarib=zaribx;
-                //apply the min scale to strenghts
-                generalscale*= zarib;
-                xscale /= zarib;
-                yscale /= zarib;
-                //define the simulation again
-                simulation.stop();
-                simulation.force("center", d3.forceCenter(xcenter,ycenter)) //change the center to the brush element center
-                //change force strengths according to scales
-                .force("x",d3.forceX(xcenter).strength(xscale))
-                .force("y",d3.forceY(ycenter).strength(yscale))
-                .force("charge",d3.forceManyBody().strength(generalscale));
-                simulation.alpha(1).restart(); //start the simulation
-
-                //some css changes to the brush element so that it won't be shown like a gray box anymore after zooming
-                d3.selectAll(".selection")
-                .attr("x",0)
-                .attr("y",0)
-                .attr("width",0)
-                .attr("height",0)
-                .attr("cursor","crosshair");
-
-                d3.selectAll(".handle")
-                .attr("x",0)
-                .attr("y",0)
-                .attr("width",0)
-                .attr("height",0)
-                .attr("cursor","crosshair");
-
-              }
-            }
-
-
-          let backtonormal= d3.select("#backtonormal") //make it back to initial state
-                      .on("click", function(){
+                    function zooming() {
+                      if (d3.event.selection) { //if selection happens
+                          let selection = d3.event.selection; //get the selection
+                          //set the new center
+                          xcenter=w- (selection[0][0]+selection[1][0])/2;
+                          ycenter=h- (selection[0][1]+selection[1][1])/2;
+                          //get width and heigth of brush element
+                          let xd= selection[1][0]-selection[0][0];
+                          let yd= selection[1][1]-selection[0][1];
+                          //calculate the xscale and yscale and find the min to apply
+                          let zaribx= w/xd;
+                          let zariby=h/yd;
+                          let zarib= 0;
+                          if(zaribx>zariby) zarib=zariby; else zarib=zaribx;
+                          //apply the min scale to strenghts
+                          generalscale*= zarib;
+                          xscale /= zarib;
+                          yscale /= zarib;
+                          //define the simulation again
                           simulation.stop();
-                          generalscale=-1000;
-                          xscale=0.5;
-                          yscale=0.5;
-                          xcenter= w/2;
-                          ycenter= h/2;
-                        simulation.force("center", d3.forceCenter(xcenter, ycenter))
-                            .force("x",d3.forceX(xcenter).strength(xscale))
-                            .force("y",d3.forceY(ycenter).strength(yscale))
-                            .force("charge",
-                              d3.forceManyBody().strength(generalscale));
-                              simulation.alpha(1).restart();
-                            });
+                          simulation.force("center", d3.forceCenter(xcenter,ycenter)) //change the center to the brush element center
+                          //change force strengths according to scales
+                          .force("x",d3.forceX(xcenter).strength(xscale))
+                          .force("y",d3.forceY(ycenter).strength(yscale))
+                          .force("charge",d3.forceManyBody().strength(generalscale));
+                          simulation.alpha(1).restart(); //start the simulation
+
+                          //some css changes to the brush element so that it won't be shown like a gray box anymore after zooming
+                          d3.selectAll(".selection")
+                          .attr("x",0)
+                          .attr("y",0)
+                          .attr("width",0)
+                          .attr("height",0)
+                          .attr("cursor","crosshair");
+
+                          d3.selectAll(".handle")
+                          .attr("x",0)
+                          .attr("y",0)
+                          .attr("width",0)
+                          .attr("height",0)
+                          .attr("cursor","crosshair");
+
+                        }
+                      }
+
+                    let backtonormal= d3.select("#backtonormal") //make it back to initial state
+                                .on("click", function(){
+                                    simulation.stop();
+                                    generalscale=-1000;
+                                    xscale=0.5;
+                                    yscale=0.5;
+                                    xcenter= w/2;
+                                    ycenter= h/2;
+                                  simulation.force("center", d3.forceCenter(xcenter, ycenter))
+                                      .force("x",d3.forceX(xcenter).strength(xscale))
+                                      .force("y",d3.forceY(ycenter).strength(yscale))
+                                      .force("charge",
+                                        d3.forceManyBody().strength(generalscale));
+                                        simulation.alpha(1).restart();
+                                      });
 
 }
     }
+
 </script>
 
 <style lang="css">

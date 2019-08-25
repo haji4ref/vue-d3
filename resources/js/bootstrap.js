@@ -4,7 +4,6 @@ import * as d3 from "d3";
 window.Vue = Vue;
 
 window.axios= Axios;
-window._ = require('lodash');
 
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
